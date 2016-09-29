@@ -31,7 +31,7 @@ T=X.shape[0]
 m1=np.zeros(size)
 D1=np.zeros((size,size))
 s=X[0,:]
-m1+=s/float(T)
+m1+=s/float(T)	
 for t in np.arange(1,T):
 	sprev=s
 	s=X[t,:]
