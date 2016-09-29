@@ -73,7 +73,7 @@ def PCA(h,J):
 	return w,v
 	
 
-class kinetic_ising:
+class ising:
 	def __init__(self, netsize):	#Create ising model
 	
 		self.size=netsize
