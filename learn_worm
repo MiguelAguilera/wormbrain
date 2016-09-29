@@ -14,14 +14,14 @@ T=neural_activation.shape[0]
 #th=np.sqrt(np.mean(neural_activation**2))
 th=np.mean(neural_activation)
 
-Nembodied=3
+Nembodied=0
 
 w= np.unwrap(np.arctan2(a[1,:], a[2,:]))
 w1=np.diff(w)
 
 X=np.zeros((T,Nn+Nembodied),int)
-for i in range(3):
-	X[:,i]=(a[i,:]>0).astype(int)*2-1
+#for i in range(3):
+#	X[:,i]=(a[i,:]>0).astype(int)*2-1
 
 X[:,Nembodied:]=(neural_activation>th).astype(int)*2-1
 
