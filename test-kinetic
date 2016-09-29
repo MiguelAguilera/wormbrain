@@ -30,7 +30,7 @@ print D1
 
 #exit(0)
 
-error=1E-3
+error=1E-5
 
 y=ising(size)
 #y.P=y1.P.copy()
