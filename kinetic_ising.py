@@ -98,13 +98,6 @@ class ising:
 		self.h=np.random.rand(self.size)*2-1
 		self.J=np.random.randn(self.size,self.size)/float(self.size)
 				
-	def random_rewire(self):
-		if np.random.rand(1)>0.5:
-			self.h[np.random.randint(self.size)]=np.random.randn(1)
-		else:
-			i=np.random.randint(self.size)
-			j=np.random.randint(self.size)
-			self.J[i,j]=np.random.randn(1)
 			
 	def GlauberStep(self):
 		s=self.s.copy()
