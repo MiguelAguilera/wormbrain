@@ -119,28 +119,6 @@ class kinetic_ising:
 		else:
 			return 2*(s[i]*self.h[i] + np.sum(s[i]*(self.J[:,i]*s)))
 		
-		for i in range(self.size):
-			for j in np.arange(i+1,self.size):
-				self.C[i,j]-=self.m[i]*self.m[j]
-		for i in range(self.size):
-			for j in range(self.size):
-				self.D[i,j]-=self.m[i]*self.m[j]
-			
-	def observables(self):	#Get mean and correlations from Monte Carlo simulation of the kinetic ising model
-		self.m=np.zeros(self.size)
-		self.D=np.zeros((self.size,self.size))
-		N=float(2**self.size)
-		for n in range(2**self.size):
-			s=bitfield(n,self.size)*2-1
-			for i in range(self.size):
-#				self.m[i]+=s[i]*self.P[n]
-				eDiff = self.deltaE(s,i)
-				pflip = 1.0/(1.0+np.exp(eDiff))
-				self.D[:,i]+=(s[i]*s*(1-pflip) - s[i]*s*pflip)*self.P[n]
-				self.m[i]+=(s[i]*(1-pflip) - s[i]*pflip)*self.P[n]
-		for i in range(self.size):
-			for j in range(self.size):
-				self.D[i,j]-=self.m[i]*self.m[j]
 
 	def observables_sample(self,sample):	#Get mean and correlations from Monte Carlo simulation of the kinetic ising model
 		self.m=np.zeros(self.size)
@@ -155,11 +133,7 @@ class kinetic_ising:
 			self.m+= (s*(1-2*pflip))*P[ind]
 			d1, d2 = np.meshgrid(s*(1-2*pflip),s)
 			self.D+= d1*d2*P[ind]
-#			for i in range(self.size):
-#				eDiff = self.deltaE(s,i)
-#				pflip = 1.0/(1.0+np.exp(eDiff))
-#				self.D[:,i]+=(s[i]*s*(1-2*pflip))*P[ind]
-#				self.m[i]+=(s[i]*(1-2*pflip))*P[ind]
+
 		for i in range(self.size):
 			for j in range(self.size):
 				self.D[i,j]-=self.m[i]*self.m[j]
@@ -199,99 +173,4 @@ class kinetic_ising:
 			count+=1
 		return fit
 		
-		
-#	def observables_energyMClocal(self,T):
-#	
-#		
-#		dh=np.zeros((self.size))
-#		dJ=np.zeros((self.size,self.size))
-#	
-#		self.HCg=0
-#		self.HC=np.zeros(self.size)
-#		E2=np.zeros(self.size)
-#		
-#		self.randomize_state()
-#		for t in range(T):
-#			sp=self.s.copy()
-#			self.GlauberStep()
-#			
-#			H=self.h + np.dot(sp,self.J)
-#			F=self.s-np.tanh(H)
-#			G=F-H/np.cosh(H)**2
-#			
-#			E2+=(H*(self.s-np.tanh(self.Beta*H)))**2/float(T)
-#			for i in range(self.size):
-#				dh[i] += (2*H[i]*F[i]*G[i] + H[i]**2*F[i]**3)/float(T)
-#				for j in range(self.size):
-##					if not i==j:
-#						dJ[j,i] += (2*sp[j]*H[i]*F[i]*G[i] + sp[j]*H[i]**2*F[i]**3)/float(T)
 
-#		self.HC+=self.Beta**2*E2
-#		self.HCg+=self.Beta**2*np.sum(E2)
-
-
-#		return dh,dJ
-
-
-#		
-#	def observables_energyMClocal(self,T):
-#	
-#		
-#		dh=np.zeros((self.size))
-#		dJ=np.zeros((self.size,self.size))
-#	
-#		self.HC=0
-##		self.HC=np.zeros(self.size)
-##		C=0
-#		self.randomize_state()
-#		for t in range(T):
-#			sp=self.s.copy()
-#			self.GlauberStep()
-#			if t%(T/10)==0:
-#				self.randomize_state()
-#			
-#			H=self.h + np.dot(sp,self.J)
-#			dP=self.s-np.tanh(H)
-#			E=-sum(H*(self.s-np.tanh(self.Beta*H))) 
-#			dE=-(dP-H/np.cosh(H)**2)
-#			
-#			self.HC+=(self.Beta**2)*(E**2)/float(T)
-#			for i in range(self.size):
-#				dh[i] += (2*E*dE[i] + E**2*dP[i])/float(T)
-#				for j in range(self.size):
-##					if not i==j:
-#						dJ[j,i] += sp[j]*(2*E*dE[i] + E**2*dP[i])/float(T)
-
-#		return dh,dJ
-		
-		
-	def HeatCapacityMC(self,T):
-	
-		
-		dh=np.zeros((self.size))
-		dJ=np.zeros((self.size,self.size))
-	
-		self.HCg=0
-		self.HC=np.zeros(self.size)
-#		C=0
-		self.randomize_state()
-		for t in range(T):
-			sp=self.s.copy()
-			self.GlauberStep()
-			if t%(T/10)==0:
-				self.randomize_state()
-			
-			H=self.h + np.dot(sp,self.J)
-			dS=self.Beta**3*(H/np.cosh(self.Beta*H))**2
-			F=2*(H-H**2*np.tanh(H))/np.cosh(H)**2
-			
-			self.HC+=dS/float(T)
-			for i in range(self.size):
-				dh[i] += F[i]/float(T)
-				for j in range(self.size):
-#					if not i==j:
-						dJ[j,i] += sp[j]*F[i]/float(T)
-						
-		self.HCg+=np.sum(self.HC)
-
-		return dh,dJ
