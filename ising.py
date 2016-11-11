@@ -141,10 +141,8 @@ class ising:
 						F[i]=compF(d[i],p[i],ql[i],l[i],beta)
 
 				ind=np.argmin(F)
-	#			print ind
 				D=d[ind]
 
-#				for ind in range(len(inds)):
 				if ind<self.size:
 					self.h[inds[ind]]+=d[ind]*1
 				else:
@@ -158,32 +156,6 @@ class ising:
 				print self.size,count,fit
 			self.observables()
 			
-#			if count>1000:
-#				u=1.0/(np.log2(count))
-				
-#				print
-#				print F
-#				print d
-#				print ind
-#				
-#				print
-#				print (m1-self.m)
-#				print (C1-self.C)
-#				print self.h
-#				print self.J
-#				
-#				di=np.arange(D-1,D+1,0.001)
-#				plt.figure()
-#				plt.plot(di,-di*p[ind] + np.log(1+(np.exp(di)-1)*ql[ind])+error*(np.abs(l[ind]+di)-np.abs(l[ind])))
-#				plt.plot(D,-D*p[ind] + np.log(1+(np.exp(D)-1)*ql[ind])+error*(np.abs(l[ind]+D)-np.abs(l[ind])),'o')
-#				
-##				ind=2
-##				D=d[ind]
-##				di=np.arange(D-1,D+1,0.001)
-##				plt.figure()
-##				plt.plot(di,-di*p[ind] + np.log(1+(np.exp(di)-1)*ql[ind])+error*(np.abs(l[ind]+di)-np.abs(l[ind])))
-##				plt.plot(D,-D*p[ind] + np.log(1+(np.exp(D)-1)*ql[ind])+error*(np.abs(l[ind]+D)-np.abs(l[ind])),'o')
-#				plt.show()
 			
 		return fit
 				
@@ -197,7 +169,6 @@ class ising:
 		fmin=fit
 		fitcount=0
 		self.independent_model(m1)
-#		Ps = self.MCsamples(samples)
 		PS=[]
 		fits=[]
 		for i in range(nT):
@@ -259,10 +230,7 @@ class ising:
 				self.observables_sample(samples)
 				fit = max (np.max(np.abs(self.m-m1)),np.max(np.abs(self.C-C1)))
 			self.observables_recycled_samples(samples,h0,J0)
-##			print
-###			print m1-self.m
 			dh=u*(m1-self.m)
-#			print self.h-h0
 			self.h+=dh
 			dJ=u*(C1-self.C)
 			self.J+=dJ
@@ -327,9 +295,6 @@ class ising:
 			s=bitfield(n,self.size)*2-1
 			Pdiff=np.exp((np.dot(s,(self.h-h0)) + np.dot(np.dot(s,(self.J-J0)),s)))
 			P1=P[ind]*Pdiff
-#			print self.J-J0
-#			print self.h-h0
-#			print 'pi',P[ind],'p1',P1,'pd',Pdiff
 			for i in range(self.size):
 				self.m[i]+=P1*s[i]
 				for j in np.arange(i+1,self.size):
@@ -337,276 +302,6 @@ class ising:
 		for i in range(self.size):
 			for j in np.arange(i+1,self.size):
 				self.C[i,j]-=self.m[i]*self.m[j]
-
-	def observables_energy(self):
-	
-		dh=np.zeros((self.size))
-		dJ=np.zeros((self.size,self.size))
-	
-		E=np.sum(self.E*self.P)
-		E2=np.sum(self.E**2*self.P)
-		
-		Esm=np.zeros(self.size)
-		E2sm=np.zeros(self.size)
-		m=np.zeros(self.size)
-		
-		
-		EsC=np.zeros((self.size,self.size))
-		E2sC=np.zeros((self.size,self.size))
-		C=np.zeros((self.size,self.size))
-		for n in range(2**self.size):
-			s=bitfield(n,self.size)*2-1
-			for i in range(self.size):
-				m[i]+=s[i]*self.P[n]
-				Esm[i]+=self.E[n]*s[i]*self.P[n]
-				E2sm[i]+=self.E[n]**2*s[i]*self.P[n]
-				for j in np.arange(i+1,self.size):
-					C[i,j]+=s[i]*s[j]*self.P[n]
-					EsC[i,j]+=self.E[n]*s[i]*s[j]*self.P[n]
-					E2sC[i,j]+=self.E[n]**2*s[i]*s[j]*self.P[n]
-		
-
-		
-		dh=m*(2*E+2*E**2-E2)-2*Esm*(1+E)+E2sm
-		dJ=C*(2*E+2*E**2-E2)-2*EsC*(1+E)+E2sC
-		
-		return dh,dJ
-		
-	def observables_gradient_SOC(self,T):
-	
-		
-		dh=np.zeros((self.size))
-		dJ=np.zeros((self.size,self.size))
-	
-		E=0
-		E2=0
-		
-		Esm=np.zeros(self.size)
-		E2sm=np.zeros(self.size)
-		m=np.zeros(self.size)
-		
-		
-		EsC=np.zeros((self.size,self.size))
-		E2sC=np.zeros((self.size,self.size))
-		C=np.zeros((self.size,self.size))
-		
-		self.randomize_state()
-		# Main simulation loop:
-		samples=[]
-		for t in range(T):
-#			self.MetropolisStep()
-			self.SequentialGlauberStep()
-			n=bool2int((self.s+1)/2)
-			Es=-(np.dot(self.s,self.h) + np.dot(np.dot(self.s,self.J),self.s))
-			E+=Es/T
-			E2+=Es**2/T
-			for i in range(self.size):
-				m[i]+=self.s[i]/float(T)
-				Esm[i]+=Es*self.s[i]/float(T)
-				E2sm[i]+=Es**2*self.s[i]/float(T)
-				for j in np.arange(i+1,self.size):
-					C[i,j]+=self.s[i]*self.s[j]/float(T)
-					EsC[i,j]+=Es*self.s[i]*self.s[j]/float(T)
-					E2sC[i,j]+=Es**2*self.s[i]*self.s[j]/float(T)
-		
-		
-#		dh=m*(2*E+2*E**2-E2)-2*Esm*(1+E)+E2sm
-		dh=-m
-		dJ=C*(2*E+2*E**2-E2)-2*EsC*(1+E)+E2sC
-		
-		self.HC=(E2-E**2)
-		
-		return dh,dJ
-
-	def observables_gradient_SOC_dynamic(self,T):
-	
-		
-		dh=np.zeros((self.size))
-		dJ=np.zeros((self.size,self.size))
-		
-#		F=np.zeros(self.size)
-#		G=np.zeros(self.size)
-#		K=np.zeros(self.size)
-		
-#		dF=np.zeros(self.size)
-#		dG=np.zeros(self.size)
-#		dK=np.zeros(self.size)
-		
-		msH=np.zeros(self.size)
-		mF=np.zeros(self.size)
-		mG=np.zeros(self.size)
-				
-		msh=np.zeros(self.size)
-		msFh=np.zeros(self.size)
-		msGh=np.zeros(self.size)
-		mdFh=np.zeros(self.size)
-		mdGh=np.zeros(self.size)
-		ms2Hh=np.zeros(self.size)
-		
-		msJ=np.zeros((self.size,self.size))
-		msFJ=np.zeros((self.size,self.size))
-		msGJ=np.zeros((self.size,self.size))
-		mdFJ=np.zeros((self.size,self.size))
-		mdGJ=np.zeros((self.size,self.size))
-		ms2HJ=np.zeros((self.size,self.size))
-		
-		self.randomize_state()
-		# Main simulation loop:
-		samples=[]
-		for t in range(T):
-			self.SequentialGlauberStep()
-			n=bool2int((self.s+1)/2)
-			H= self.h + np.dot(self.s,self.J)+ np.dot(self.J,self.s)
-			F = H*np.tanh(H)-np.log(2*np.cosh(H))
-#			print
-#			print self.s
-#			print H
-#			print F
-			G = (H/np.cosh(H))**2 + self.s*H*F
-			dF = H/np.cosh(H)**2
-			dG = 2*H*(1-H*np.tanh(H))/np.cosh(H)**2 + self.s*F + self.s*H*dF
-			
-			msH+=self.s*H/float(T)
-			mF+=F/float(T)
-			mG+=G/float(T)
-			
-			
-			msh+=self.s/float(T)
-			msFh+=self.s*F/float(T)
-			msGh+=self.s*G/float(T)
-			mdFh+=dF/float(T)
-			mdGh+=dG/float(T)
-			ms2Hh+=H/float(T)
-			
-#			for i in range(self.size):
-			for j in range(self.size):
-				msJ[j,:]+=self.s*self.s[j]/float(T)
-				msFJ[j,:]+=self.s*self.s[j]*F/float(T)
-				msGJ[j,:]+=self.s*self.s[j]*G/float(T)
-				mdFJ[j,:]+=self.s[j]*dF/float(T)
-				mdGJ[j,:]+=self.s[j]*dG/float(T)
-				ms2HJ[j,:]+=self.s[j]*H/float(T)
-#					if not i==j:						
-#						msJ[j,i]+=self.s[i]*self.s[j]/float(T)
-#						msFJ[j,i]+=self.s[i]*self.s[j]*F[i]/float(T)
-#						msGJ[j,i]+=self.s[i]*self.s[j]*G[i]/float(T)
-#						mdFJ[j,i]+=self.s[j]*dF[i]/float(T)
-#						mdGJ[j,i]+=self.s[j]*dG[i]/float(T)
-#						ms2HJ[j,i]+=self.s[i]**2*self.s[j]*H[i]/float(T)
-			
-		dh = mdGh + msGh - msh*mG - (msh+ms2Hh-msh*msH)*mF - msH*(mdFh+msFh-msh*mF)
-#		dh =-msh
-		dJ1 = mdGJ + msGJ - msJ*mG - (msJ+ms2HJ-msJ*msH)*mF - msH*(mdFJ+msFJ-msJ*mF)
-		
-#		print np.max(np.abs(mdGJ)), np.max(np.abs(msGJ)), np.max(np.abs(msJ*mG)),np.max(np.abs((msJ+ms2HJ-msJ*msH)*mF)),np.max(np.abs(msH*(mdFJ+msFJ-msJ*mF)))
-
-				
-		Nactive=self.size-3
-		dh[Nactive:]=0
-		dJ=np.zeros((self.size,self.size))
-		for j in range(self.size):
-			for i in np.arange(Nactive):
-				if i>j:
-					dJ[j,i]+=dJ1[j,i]
-				elif j>i:
-					dJ[i,j]+=dJ1[j,i]
-#			for j in np.arange(i+1,self.size):
-#				dJ[i,j]=dJ1[i,j]+dJ1[j,i]
-#		dJ=dJ1
-
-		
-		self.HCl=mG-msH*mF
-		self.HC=np.sum(self.HCl[0:Nactive])
-		
-		return dh,dJ
-
-#	def observables_gradient_SOC_local(self,T):
-#	
-#		
-#		dh=np.zeros((self.size))
-#		dJ=np.zeros((self.size,self.size))
-#	
-#		E=0
-#		E2=0
-#		Egm=0
-#		Eg2m=0
-#		
-#		Esm=np.zeros(self.size)
-#		E2sm=np.zeros(self.size)
-#		m=np.zeros(self.size)
-#		
-#		
-#		EsC=np.zeros((self.size,self.size))
-#		E2sC=np.zeros((self.size,self.size))
-#		C=np.zeros((self.size,self.size))
-#		
-#		self.randomize_state()
-#		# Main simulation loop:
-#		samples=[]
-#		for t in range(T):
-##			self.MetropolisStep()
-#			self.SequentialGlauberStep()
-#			n=bool2int((self.s+1)/2)
-#			Eg=-(np.dot(self.s,self.h) + np.dot(np.dot(self.s,self.J),self.s)) #Global energy
-#			Es= - self.s*self.h + np.dot(self.s,self.J)+ np.dot(self.J,self.s)  #Local energy
-#			E+=Es/T
-#			E2+=Es**2/T
-#			Egm+=Eg/T
-#			Eg2m+=Eg**2/T
-#			for i in range(self.size):
-#				m[i]+=self.s[i]/float(T)
-#				Esm[i]+=Es[i]*self.s[i]/float(T)
-#				E2sm[i]+=Es[i]**2*self.s[i]/float(T)
-#				for j in np.arange(i+1,self.size):
-#					C[i,j]+=self.s[i]*self.s[j]/float(T)
-#					EsC[i,j]+=Es[i]*self.s[i]*self.s[j]/float(T)
-#					E2sC[i,j]+=Es[i]**2*self.s[i]*self.s[j]/float(T)
-#		
-#		for i in range(self.size):
-#			dh[i]=m[i]*(2*E[i]+2*E[i]**2-E2[i])-2*Esm[i]*(1+E[i])+E2sm[i]
-#			for j in np.arange(i+1,self.size):
-#				dJ[i,j]=C[i,j]*(2*E[i]+2*E[i]**2-E2[i])-2*EsC[i,j]*(1+E[i])+E2sC[i,j]
-#		
-#		self.HC=np.sum(Eg2m-Egm**2)
-#		
-#		return dh,dJ
-		
-	def SOCstep(self,T):	
-#		self.energy()
-		u=0.004
-		u1=0.001
-		dh,dJ=self.observables_gradient_SOC_dynamic(T)
-		
-#		dh1=self.h-np.mean(np.abs(self.h))
-#		dJ1=self.J-np.mean(np.abs(self.J))
-		self.h+=u*dh
-		self.J+=u*dJ
-		
-#		l1=0.0
-#		l2=0.00	
-#		self.h+=u*dh - l1*self.h
-#		self.J+=u*dJ - l2*self.J*self.size
-#		i=np.random.randint(self.size)
-#		self.h[i]+=u*dh[i]
-#		self.J[i,:]+=u*dJ[i,:]
-#		self.J[:,i]+=u*dJ[:,i]
-
-#		cost=np.zeros((self.size,self.size))
-#		for i in range(self.size):
-#			for j in np.arange(i+1,self.size):
-#				cost[i,j]=np.log(np.abs(i-j))
-#		self.h+=u*dh
-#		self.J+=u*dJ - cost*u1*np.sign(self.J)
-
-#		Nactive=4
-#		self.h[0:Nactive]+=u*dh[0:Nactive]
-#		for i in range(Nactive):
-#			self.J[i,i:]+=u*dJ[i,i:]
-		
-#		dh,dJ=self.observables_gradient_SOC(T)
-
-		
-				
 			
 	def MetropolisStep(self,i=None):	    #Execute step of Metropolis algorithm
 		if i is None:
@@ -637,8 +332,7 @@ class ising:
 	def deltaE(self,i):		#Compute energy difference between two states with a flip of spin i
 		return 2*(self.s[i]*self.h[i] + np.sum(self.s[i]*(self.J[i,:]*self.s)+self.s[i]*(self.J[:,i]*self.s)))
  
-			
-				
+
 	def metastable_states(self):	#Find the metastable states of the system
 		self.pdf()
 		self.ms=[]
