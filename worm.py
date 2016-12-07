@@ -84,7 +84,7 @@ def get_positions(sheet_index=0):
 	M=102
 	t=100
 	
-	with open('files/pnas.1507110112.sd'+("%02d" % (ind0,))+'.csv', 'rb') as csvfile:
+	with open('files/pnas.1507110112.sd'+("%02d" % (ind0,))+'.csv', 'rt') as csvfile:
 		reader = csv.reader(csvfile, delimiter=',', quotechar='|')
 		for row in reader:
 			N=len(row)
@@ -95,21 +95,21 @@ def get_positions(sheet_index=0):
 	t=np.zeros(N)
 	
 	count =0
-	with open('files/pnas.1507110112.sd'+("%02d" % (ind0,))+'.csv', 'rb') as csvfile:
+	with open('files/pnas.1507110112.sd'+("%02d" % (ind0,))+'.csv', 'rt') as csvfile:
 		reader = csv.reader(csvfile, delimiter=',', quotechar='|')
 		for row in reader:
 			x[count,:] = np.array(row,float)
 			count+=1
 			
 	count =0
-	with open('files/pnas.1507110112.sd'+("%02d" % (ind0+1,))+'.csv', 'rb') as csvfile:
+	with open('files/pnas.1507110112.sd'+("%02d" % (ind0+1,))+'.csv', 'rt') as csvfile:
 		reader = csv.reader(csvfile, delimiter=',', quotechar='|')
 		for row in reader:
 			y[count,:] = np.array(row,float)
 			count+=1
 			
 	count =0
-	with open('files/pnas.1507110112.sd'+("%02d" % (ind0+2,))+'.csv', 'rb') as csvfile:
+	with open('files/pnas.1507110112.sd'+("%02d" % (ind0+2,))+'.csv', 'rt') as csvfile:
 		reader = csv.reader(csvfile, delimiter=',', quotechar='|')
 		for row in reader:
 			t = np.array(row,float)
@@ -419,10 +419,10 @@ def plot_movement(sheet_index=0):
 #	plt.plot(Mr>0)
 #	plt.plot(Ml>0)
 	
-	print np.mean((Mr>0)*(Ml>0))
-	print np.mean((Mr<0)*(Ml<0))
-	print np.mean((Mr>0)*(Ml<0))
-	print np.mean((Mr<0)*(Ml>0))
+	print(np.mean((Mr>0)*(Ml>0)))
+	print(np.mean((Mr<0)*(Ml<0)))
+	print(np.mean((Mr>0)*(Ml<0)))
+	print(np.mean((Mr<0)*(Ml>0)))
 	
 	M=102
 	t=100
@@ -481,7 +481,7 @@ if __name__ == '__main__':
 	plt.figure()
 	plt.plot(np.sin(np.diff(w1)))
 	
-	print 'forward',np.mean(np.sin(np.diff(w1))>0)
-	print 'backwards',np.mean(np.sin(np.diff(w1))<0)
+	print('forward',np.mean(np.sin(np.diff(w1))>0))
+	print('backwards',np.mean(np.sin(np.diff(w1))<0))
 	
 	

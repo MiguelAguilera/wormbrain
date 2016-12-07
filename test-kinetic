@@ -24,8 +24,8 @@ for n in sample[1:]:
 for i in range(size):
 	for j in range(size):
 			D1[i,j]-=m1[i]*m1[j]
-print m1
-print D1
+print(m1)
+print(D1)
 
 
 #exit(0)
@@ -37,13 +37,13 @@ y=ising(size)
 
 y.independent_model(m1)
 fit=y.inverse(m1,D1,error,sample)
-print fit
-print np.mean(np.sqrt(np.abs(y.h-y1.h)**2)),np.max(np.abs(y.h-y1.h))
-print np.mean(np.sqrt(np.abs(y.J-y1.J)**2)),np.max(np.abs(y.J-y1.J))
-print
-print y.h
-print y1.h
+print(fit)
+print(np.mean(np.sqrt(np.abs(y.h-y1.h)**2)),np.max(np.abs(y.h-y1.h)))
+print(np.mean(np.sqrt(np.abs(y.J-y1.J)**2)),np.max(np.abs(y.J-y1.J)))
+print()
+print(y.h)
+print(y1.h)
 
-print
-print y.J
-print y1.J
+print()
+print(y.J)
+print(y1.J)

@@ -42,8 +42,8 @@ for t in np.arange(1,T):
 for i in range(size):
 	for j in range(size):
 			D1[i,j]-=m1[i]*m1[j]
-print m1
-print D1
+print(m1)
+print(D1)
 
 plt.figure()
 plt.imshow(D1,interpolation='nearest')

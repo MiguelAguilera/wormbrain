@@ -4,14 +4,14 @@ import matplotlib.pyplot as plt
 from scipy.special import erfinv
 	
 def bool2int(x):				#Transform bool array into positive integer
-    y = 0L
+    y = 0
     for i,j in enumerate(np.array(x)[::-1]):
 #        y += j<<i
-        y += long(j*2**i)
+        y += j*2**i
     return y
     
 def bitfield(n,size):			#Transform positive integer into bit array
-    x = [int(x) for x in bin(n)[2:]]
+    x = [int(x) for x in bin(int(n))[2:]]
     x = [0]*(size-len(x)) + x
     return np.array(x)
 
@@ -162,7 +162,7 @@ class ising:
 			self.J+=dJ
 			fit = max (np.max(np.abs(self.m-m1)),np.max(np.abs(self.D-D1)))
 			if count%10==0:
-				print self.size,count,fit
+				print(self.size,count,fit)
 			count+=1
 		return fit
 		
