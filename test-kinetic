@@ -3,7 +3,7 @@
 from kinetic_ising import ising, Entropy,bitfield
 import numpy as np
 
-size=4
+size=20
 T=1000
 y1=ising(size)
 y1.random_wiring()
@@ -24,10 +24,11 @@ for n in sample[1:]:
 for i in range(size):
 	for j in range(size):
 			D1[i,j]-=m1[i]*m1[j]
-print(m1)
-print(D1)
+print("Medias " + str(m1))
+print("Desviaciones " + str(D1))
 
 
+print(np.max(np.abs(D1)))
 #exit(0)
 
 error=1E-5
@@ -36,7 +37,7 @@ y=ising(size)
 #y.P=y1.P.copy()
 
 y.independent_model(m1)
-fit=y.inverse(m1,D1,error,sample)
+fit=y.inverse(m1,D1,error,sample) #Resuelve el sistema Ising Desc. Gradiente
 print(fit)
 print(np.mean(np.sqrt(np.abs(y.h-y1.h)**2)),np.max(np.abs(y.h-y1.h)))
 print(np.mean(np.sqrt(np.abs(y.J-y1.J)**2)),np.max(np.abs(y.J-y1.J)))
@@ -45,5 +46,5 @@ print(y.h)
 print(y1.h)
 
 print()
-print(y.J)
-print(y1.J)
+print("J Calculado " + str(y.J))
+print("J Real " + str(y1.J))
