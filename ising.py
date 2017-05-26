@@ -102,7 +102,7 @@ class ising:
 						return D[0]
 					else:
 #						print compF(-l,p,ql,l,beta)
-						print ('error',len(D))
+						print 'error',len(D)
 						return None
 #						
 #						plt.figure()
@@ -153,7 +153,7 @@ class ising:
 			fit = max (np.max(np.abs(self.m-m1)),np.max(np.abs(self.C-C1)))
 			count+=1
 			if count%1==0:
-				print (self.size,count,fit)
+				print self.size,count,fit
 			self.observables()
 			
 			
@@ -206,7 +206,7 @@ class ising:
 						samples+=samples/2
 					fitcount=0
 			if count%10==0:
-				print (self.size,count,len(Ps)/2.0**self.size,samples,fit)
+				print self.size,count,len(Ps)/2.0**self.size,samples,fit
 			count+=1
 	
 		return fit
@@ -237,7 +237,7 @@ class ising:
 			fit1 = max (np.max(np.abs(self.m-m1)),np.max(np.abs(self.C-C1)))
 
 			if count%10==0:
-				print (self.size,count,fit,fit1)
+				print self.size,count,fit,fit1
 			count+=1
 	
 		return fit
@@ -250,7 +250,7 @@ class ising:
 			self.MetropolisStep()
 			n=bool2int((self.s+1)/2)
 			if n<0:
-				print( n)
+				print n
 				print ((self.s+1)/2)
 			P[n]=np.exp((np.dot(self.s,self.h) + np.dot(np.dot(self.s,self.J),self.s)))
 		return P
@@ -378,10 +378,10 @@ class ising:
 
 	
 def bool2int(x):				#Transform bool array into positive integer
-    y = 0
+    y = 0L
     for i,j in enumerate(np.array(x)[::-1]):
 #        y += j<<i
-        y += j*2**i
+        y += long(j*2**i)
     return y
     
 def bitfield(n,size):			#Transform positive integer into bit array

@@ -1,11 +1,7 @@
 import numpy as np
-import matplotlib.pyplot as plt
-import math as mt
-
 from itertools import combinations
+import matplotlib.pyplot as plt
 from scipy.special import erfinv
-from numba import jit
-
 	
 def bool2int(x):				#Transform bool array into positive integer
     y = 0
@@ -85,8 +81,6 @@ class ising:
 		self.J=np.zeros((netsize,netsize))
 		self.Beta=1
 		self.randomize_state()
-		self.convergencias_malas = 0
-		self.divergencias = 0
 
 	
 	def randomize_state(self):
@@ -102,14 +96,14 @@ class ising:
 
 	def random_wiring(self):	#Set random values for h and J
 		self.h=np.random.rand(self.size)*2-1
-		self.J=np.random.randn(self.size,self.size)
+		self.J=np.random.randn(self.size,self.size)/float(self.size)
 				
 			
 	def GlauberStep(self):
 		s=self.s.copy()
 		for i in range(self.size):
 			eDiff = self.deltaE(s,i)
-			if np.random.rand() < 1.0/(1.0+np.exp(eDiff/self.Beta)):    # Glauber
+			if np.random.rand(1) < 1.0/(1.0+np.exp(self.Beta*eDiff)):    # Glauber
 				self.s[i] = -self.s[i]
 		
 	def deltaE(self,s,i=None):
@@ -153,84 +147,23 @@ class ising:
 		for i in range(self.size):
 			self.h[i]=-0.5*np.log((1-m[i])/(1+m[i]))
 		self.J=np.zeros((self.size,self.size))
-        
-	def diverge(self, errores, u):
-	   proporciones = np.zeros(len(errores)-1)
-	   aumentos = np.zeros(len(errores)-1)
-	   for i in np.arange(1,len(errores)):
-	      proporciones[i-1]= errores[i]/errores[i-1]
-	      aumentos[i-1] = errores[i] < errores[i-1]
-	   proporciones = abs(proporciones - 1)
-	   if (abs(sum(aumentos)) > len(aumentos)*0.4) and (abs(sum(aumentos)) < len(aumentos)*0.6) and (np.sum(proporciones)>u):            
-            #self.divergencias = -10
-            return True
-	   #self.divergencias = 0    
-	   return False
-      
-	def converge_mal(self,errores, u):
-	   proporciones = np.zeros(len(errores)-1)
-	   aumentos = np.zeros(len(errores)-1)
-	   for i in np.arange(1,len(errores)):
-	      proporciones[i-1]= errores[i]/errores[i-1]
-	      aumentos[i-1] = errores[i] < errores[i-1]
-	   proporciones = abs(proporciones - 1)
-	   if (abs(sum(aumentos==True)-sum(aumentos==False)) < 2) and (np.mean(proporciones)<u):
-            if self.convergencias_malas < 3:
-                self.convergencias_malas += 1
-                return False 
-            else:
-                self.convergencias_malas = -10
-                return True
-            
-	   self.convergencias_malas = 0
-	   return False
-   
-	@jit
-	def inverse(self,m1,D1, error,sample, maximum_error = True, u = 0.1, verboso = True,
-             max_iteration = mt.inf):
+		
+	def inverse(self,m1,D1, error,sample):
+		u=0.1
 		count=0
 		self.observables_sample(sample)
-		errores = np.zeros(10)
-		errores_divergencia = np.zeros(100)
-		hold = False
-
-		if (maximum_error):
-			   fit = max (np.max(np.abs(self.m-m1)),np.max(np.abs(self.D-D1)))
-		else:
-			   fit = max (np.mean(np.abs(self.m-m1)),np.mean(np.abs(self.D-D1))) 
+		fit = max (np.max(np.abs(self.m-m1)),np.max(np.abs(self.D-D1)))
 		
-		while (fit>error) and (max_iteration>count):
+		while fit>error:
 			self.observables_sample(sample)
 			dh=u*(m1-self.m)
 			self.h+=dh
 			dJ=u*(D1-self.D)
 			self.J+=dJ
-			if (maximum_error):
-			   fit = max (np.max(np.abs(self.m-m1)),np.max(np.abs(self.D-D1)))
-			else:
-			   fit = max (np.mean(np.abs(self.m-m1)),np.mean(np.abs(self.D-D1)))
-               
-			errores[count%10-1] = fit
-			errores_divergencia[count%100-1] = fit
-               
-			if (count>0) and (count%10==0):
-			   if (not hold):                   
-			       if (self.diverge(errores_divergencia, u)) :
-			           print("Reajustado el factor de aprendizaje por divergencia")
-			          
-			           hold = True
-			       if (self.converge_mal(errores, u)):
-			            print("Rajustado el factor de aprendizaje por convergencia mala")
-			            u = u / 10.0
-			   else:
-			       if (errores[-1] < errores[-2]):
-			           u = u / 10.0
-			           hold = False
-			  
-			   if verboso:      
-			      print(self.size,count,fit,u)
+			fit = max (np.max(np.abs(self.m-m1)),np.max(np.abs(self.D-D1)))
+			if count%10==0:
+				print(self.size,count,fit)
 			count+=1
-            
 		return fit
 		
 
